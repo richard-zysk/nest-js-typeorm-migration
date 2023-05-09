@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("./dto/user.entity");
 const typeorm_2 = require("typeorm");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 let AppService = class AppService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -25,8 +27,22 @@ let AppService = class AppService {
         const { email, password } = createUserDto;
         const user = new user_entity_1.User();
         user.email = email;
-        user.password = password;
+        user.password = await bcrypt.hash(password, 10);
         return this.userRepository.save(user);
+    }
+    async login(createUserDto) {
+        const { email, password } = createUserDto;
+        const options = { where: { email }, };
+        const user = await this.userRepository.findOne(options);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        const token = jwt.sign({ email: user.email, id: user.id }, 'my_secret_key_here');
+        return { token };
     }
     getHello() {
         return 'Hello World!';

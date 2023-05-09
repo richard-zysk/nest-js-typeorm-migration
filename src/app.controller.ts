@@ -3,15 +3,21 @@ import { AppService } from './app.service';
 import { User } from './dto/user.entity';
 import { CreateUserDto } from './dto/user-dto';
 
-@Controller()
+@Controller('auth')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post()
+  @Post('register')
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.appService.create(createUserDto);
   }
 
+
+@Post('login')
+async login(@Body() createUserDto: CreateUserDto): Promise<{ token: string }>{
+  return this.appService.login(createUserDto);
+}
+  
   @Get()
   getHello(): string {
     return this.appService.getHello();

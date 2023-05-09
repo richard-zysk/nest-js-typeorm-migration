@@ -5,5 +5,8 @@ export declare class AppService {
     private userRepository;
     constructor(userRepository: Repository<User>);
     create(createUserDto: CreateUserDto): Promise<User>;
+    login(createUserDto: CreateUserDto): Promise<{
+        token: string;
+    }>;
     getHello(): string;
 }
